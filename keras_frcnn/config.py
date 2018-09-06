@@ -15,15 +15,17 @@ class Config:
 		self.rot_90 = False
 
 		# anchor box scales
-		self.anchor_box_scales = [128, 256, 512]
+		self.anchor_box_scales = [256,512,1024]
 
 		# anchor box ratios
-		self.anchor_box_ratios = [[1, 1], [1./math.sqrt(2), 2./math.sqrt(2)], [2./math.sqrt(2), 1./math.sqrt(2)]]
-
+		self.anchor_box_ratios = [[1, 1], [1./math.sqrt(3), 3./math.sqrt(3)], [2./math.sqrt(2), 1./math.sqrt(2)], [3./math.sqrt(3), 1./math.sqrt(3)],[5./math.sqrt(5), 1./math.sqrt(5)], [8./math.sqrt(8), 1./math.sqrt(8)]]
+	
+		#Important note: len(anchor_box_ratios) >= len(anchor_box_scales) , otherwise, their may be a bug
+		
 		# size to resize the smallest side of the image
 		self.im_size = 600
 
-		# image channel-wise mean to subtract
+		# image channel-wise mean to subtract (RGB)
 		self.img_channel_mean = [103.939, 116.779, 123.68]
 		self.img_scaling_factor = 1.0
 
@@ -31,7 +33,7 @@ class Config:
 		self.num_rois = 4
 
 		# stride at the RPN (this depends on the network configuration)
-		self.rpn_stride = 16
+		self.rpn_stride = 21
 
 		self.balanced_classes = False
 
