@@ -123,7 +123,7 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(2, 2),
 
 
 def conv_block_td(input_tensor, kernel_size, filters, stage, block, input_shape, strides=(2, 2), trainable=True):
-
+    #input_tensor.shape=(1, self.num_rois, self.pool_size, self.pool_size, self.nb_channels)
     # conv block time distributed
 
     nb_filter1, nb_filter2, nb_filter3 = filters
@@ -201,7 +201,9 @@ def nn_base(input_tensor=None, trainable=False):
 
 
 def classifier_layers(x, input_shape, trainable=False):
-
+    #Note: TimeDistributed is to process primary "batch", num_rois is secondary batch which use conv2d to handle
+    
+    
     # compile times on theano tend to be very high, so we use smaller ROI pooling regions to workaround
     # (hence a smaller stride in the region that follows the ROI pool)
     if K.backend() == 'tensorflow':
@@ -212,7 +214,7 @@ def classifier_layers(x, input_shape, trainable=False):
     x = identity_block_td(x, 3, [512, 512, 2048], stage=5, block='b', trainable=trainable)
     x = identity_block_td(x, 3, [512, 512, 2048], stage=5, block='c', trainable=trainable)
     x = TimeDistributed(AveragePooling2D((7, 7)), name='avg_pool')(x)
-
+    # x.shape = (batch, num_rois, 7,7, 2048)
     return x
 
 
@@ -226,7 +228,7 @@ def rpn(base_layers,num_anchors):
     return [x_class, x_regr, base_layers]
 
 def classifier(base_layers, input_rois, num_rois, nb_classes = 21, trainable=False):
-
+    #base_layers.shape = [batch,featuremap_height,featuremap_width,1024]
     # compile times on theano tend to be very high, so we use smaller ROI pooling regions to workaround
 
     if K.backend() == 'tensorflow':
@@ -237,6 +239,9 @@ def classifier(base_layers, input_rois, num_rois, nb_classes = 21, trainable=Fal
         input_shape = (num_rois,1024,7,7)
 
     out_roi_pool = RoiPoolingConv(pooling_regions, num_rois)([base_layers, input_rois])
+    #out_roi_pool = (1, self.num_rois, self.pool_size, self.pool_size, self.nb_channels)
+    #My understanding is that it has two "batch", firstone is batch, second one is num_rois
+    
     out = classifier_layers(out_roi_pool, input_shape=input_shape, trainable=True)
 
     out = TimeDistributed(Flatten())(out)
@@ -244,5 +249,8 @@ def classifier(base_layers, input_rois, num_rois, nb_classes = 21, trainable=Fal
     out_class = TimeDistributed(Dense(nb_classes, activation='softmax', kernel_initializer='zero'), name='dense_class_{}'.format(nb_classes))(out)
     # note: no regression target for bg class
     out_regr = TimeDistributed(Dense(4 * (nb_classes-1), activation='linear', kernel_initializer='zero'), name='dense_regress_{}'.format(nb_classes))(out)
+    
+    #out_class.shape = [batch, num_rois, b_classes]
+    #out_class.shape = [batch, num_rois, 4 * (nb_classes-1)]
     return [out_class, out_regr]
 

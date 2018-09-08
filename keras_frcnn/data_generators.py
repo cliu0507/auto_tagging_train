@@ -84,7 +84,7 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 	num_anchors = len(anchor_sizes) * len(anchor_ratios) # num_anchors = 9
 	# calculate the output map size based on the network architecture
 
-	(output_width, output_height) = img_length_calc_function(resized_width, resized_height)
+	(output_width, output_height) = img_length_calc_function(resized_width, resized_height) #- featuremap_height/width
 	#Assume resized_height = 1000, resized_weight = 600, use vgg 16
 	#(output_width, output_height) = (37, 62)
 
@@ -92,8 +92,8 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 	
 	# initialise empty output objectives
 	#In np array , height first
-	y_rpn_overlap = np.zeros((output_height, output_width, num_anchors)) # y_rpn_overlap.shape = [62,37,9] - means whether a rp match ground truth bbox 
-	y_is_box_valid = np.zeros((output_height, output_width, num_anchors)) # y_is_box_valid.shape = [62,37,9] - means whether a ground truth exists
+	y_rpn_overlap = np.zeros((output_height, output_width, num_anchors)) # y_rpn_overlap.shape = [62,37,9] - means if this is a valid pos/neg anchor sample, if 1 means yes(ground truth mask)
+	y_is_box_valid = np.zeros((output_height, output_width, num_anchors)) # y_is_box_valid.shape = [62,37,9] - means positive or negetive anchor sample
 	y_rpn_regr = np.zeros((output_height, output_width, num_anchors * 4)) # y_rpn_regr.shape = [62,37,9*4]
 
 	num_bboxes = len(img_data['bboxes']) # number of bounding box in single groundtruth image
