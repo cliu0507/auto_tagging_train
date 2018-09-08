@@ -14,6 +14,10 @@ epsilon = 1e-4
 
 
 def rpn_loss_regr(num_anchors):
+	# y_true = np.concatenate([np.repeat(y_rpn_overlap, 4, axis=1), y_rpn_regr], axis=1)
+	#  y_true.shape = [1,62,37，num_anchor * 4,]
+	
+	# y_pred -- [batch, featuremap_height, featuremap_weight,num_anchor * 4 ]
 	def rpn_loss_regr_fixed_num(y_true, y_pred):
 		if K.image_dim_ordering() == 'th':
 			x = y_true[:, 4 * num_anchors:, :, :] - y_pred
@@ -33,6 +37,11 @@ def rpn_loss_regr(num_anchors):
 
 
 def rpn_loss_cls(num_anchors):
+	#y_true -- [1,featuremap_height,featuremap_width,2 * number of anchors] - include gt and rp anchor
+	# np.concatenate([y_is_box_valid, y_rpn_overlap])
+	
+	#y_pred -- [1,featuremap_height,featuremap_width,  number of anchors]
+	
 	def rpn_loss_cls_fixed_num(y_true, y_pred):
 		if K.image_dim_ordering() == 'tf':
 			return lambda_rpn_class * K.sum(y_true[:, :, :, :num_anchors] * K.binary_crossentropy(y_pred[:, :, :, :], y_true[:, :, :, num_anchors:])) / K.sum(epsilon + y_true[:, :, :, :num_anchors])
@@ -43,6 +52,8 @@ def rpn_loss_cls(num_anchors):
 
 
 def class_loss_regr(num_classes):
+	# y_true -- [1,num_rois, 2 * number of anchors * 4]
+	# y_pred -- [1,num_rois,  number of anchors * 4]
 	def class_loss_regr_fixed_num(y_true, y_pred):
 		x = y_true[:, :, 4*num_classes:] - y_pred
 		x_abs = K.abs(x)

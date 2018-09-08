@@ -73,8 +73,9 @@ def calc_iou(R, img_data, C, class_mapping):
 		class_label = len(class_mapping) * [0]
 		class_label[class_num] = 1
 		y_class_num.append(copy.deepcopy(class_label))
+		# a list of one-hot list of class_mapping
 		coords = [0] * 4 * (len(class_mapping) - 1)
-		labels = [0] * 4 * (len(class_mapping) - 1)
+		labels = [0] * 4 * (len(class_mapping) - 1) # mark if the cordinate(value to be regressed) is valid or not
 		if cls_name != 'bg':
 			label_pos = 4 * class_num
 			sx, sy, sw, sh = C.classifier_regr_std
@@ -85,16 +86,25 @@ def calc_iou(R, img_data, C, class_mapping):
 		else:
 			y_class_regr_coords.append(copy.deepcopy(coords))
 			y_class_regr_label.append(copy.deepcopy(labels))
-
+	
+	#y_class_regr_coords is a list of [sx*tx, sy*ty, sw*tw, sh*th] * num_class
+	#y_class_regr_label is a boolean value list of [sx*tx, sy*ty, sw*tw, sh*th] * num_class
+	
+	#x_roi is a list of [x1, y1, w, h],note (x1, y1) is lefttop pixel
 	if len(x_roi) == 0:
 		return None, None, None, None
 
 	X = np.array(x_roi)
+	#X.shape = [num_rois,4] - last dimension is [x1, y1, w, h],note (x1, y1) is lefttop pixel
 	Y1 = np.array(y_class_num)
+	#Y1.shape = [num_rois,class_mapping] (one-hot, include background)
 	Y2 = np.concatenate([np.array(y_class_regr_label),np.array(y_class_regr_coords)],axis=1)
-
+	#Y2.shape = concat{[num_rois,class_mapping * 4],[num_rois,class_mapping * 4] }
 	return np.expand_dims(X, axis=0), np.expand_dims(Y1, axis=0), np.expand_dims(Y2, axis=0), IoUs
-
+	#add batch dimension np.expand_dims(X, axis=0).shape = [batch,num_rois,4]
+	
+	
+	
 def apply_regr(x, y, w, h, tx, ty, tw, th):
 	try:
 		cx = x + w/2.
@@ -122,11 +132,14 @@ def apply_regr(x, y, w, h, tx, ty, tw, th):
 
 def apply_regr_np(X, T):
 	try:
-		x = X[0, :, :]
+		
+		#This is orginal anchor rp
+		x = X[0, :, :] # note:this is the lefttop point
 		y = X[1, :, :]
 		w = X[2, :, :]
 		h = X[3, :, :]
-
+		
+		#Actual groundtruth best regressor
 		tx = T[0, :, :]
 		ty = T[1, :, :]
 		tw = T[2, :, :]
@@ -134,7 +147,7 @@ def apply_regr_np(X, T):
 
 		cx = x + w/2.
 		cy = y + h/2.
-		cx1 = tx * w + cx
+		cx1 = tx * w + cx # new center point
 		cy1 = ty * h + cy
 
 		w1 = np.exp(tw.astype(np.float64)) * w
@@ -154,6 +167,9 @@ def apply_regr_np(X, T):
 def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
 	# code used from here: http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
 	# if there are no boxes, return an empty list
+	
+	# #all_boxes.shape = [num_anchor*featuremap_height*featuremap_width, 4]
+	#all_probs = [num_anchor*featuremap_height*featuremap_width]
 	if len(boxes) == 0:
 		return []
 
@@ -221,12 +237,14 @@ def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
 
 import time
 def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=300,overlap_thresh=0.9):
-
+	#rpn_layer.shape = [batch, featuremap_height, featuremap_weight, num_anchor]
+	#regr_layer.shape = [batch, featuremap_height, featuremap_weight, num_anchor * 4]
 	regr_layer = regr_layer / C.std_scaling
 
 	anchor_sizes = C.anchor_box_scales
 	anchor_ratios = C.anchor_box_ratios
-
+	
+	#batch size must equal to 1
 	assert rpn_layer.shape[0] == 1
 
 	if dim_ordering == 'th':
@@ -234,13 +252,15 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 
 	elif dim_ordering == 'tf':
 		(rows, cols) = rpn_layer.shape[1:3]
-
+	#rows,cols = (featuremap_height, featuremap_width)
+	
 	curr_layer = 0
 	if dim_ordering == 'tf':
 		A = np.zeros((4, rpn_layer.shape[1], rpn_layer.shape[2], rpn_layer.shape[3]))
 	elif dim_ordering == 'th':
 		A = np.zeros((4, rpn_layer.shape[2], rpn_layer.shape[3], rpn_layer.shape[1]))
-
+	#A.shape.shape = [4, featuremap_height, featuremap_weight, num_anchor]
+	
 	for anchor_size in anchor_sizes:
 		for anchor_ratio in anchor_ratios:
 
@@ -251,11 +271,13 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 			else:
 				regr = regr_layer[0, :, :, 4 * curr_layer:4 * curr_layer + 4]
 				regr = np.transpose(regr, (2, 0, 1))
-
+			#regr.shape = [num_anchor,featuremap_height,featuremap_width]
 			X, Y = np.meshgrid(np.arange(cols),np. arange(rows))
-
-			A[0, :, :, curr_layer] = X - anchor_x/2
-			A[1, :, :, curr_layer] = Y - anchor_y/2
+			#X.shape = [1,cols]
+			
+			#A is the anchor region proposal
+			A[0, :, :, curr_layer] = X - anchor_x/2 # the most lefttop point
+			A[1, :, :, curr_layer] = Y - anchor_y/2 # the most lefttop point
 			A[2, :, :, curr_layer] = anchor_x
 			A[3, :, :, curr_layer] = anchor_y
 
@@ -264,8 +286,8 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 
 			A[2, :, :, curr_layer] = np.maximum(1, A[2, :, :, curr_layer])
 			A[3, :, :, curr_layer] = np.maximum(1, A[3, :, :, curr_layer])
-			A[2, :, :, curr_layer] += A[0, :, :, curr_layer]
-			A[3, :, :, curr_layer] += A[1, :, :, curr_layer]
+			A[2, :, :, curr_layer] += A[0, :, :, curr_layer] # it become x2,y2 by applying this
+			A[3, :, :, curr_layer] += A[1, :, :, curr_layer] # it become x2,y2 by applying this
 
 			A[0, :, :, curr_layer] = np.maximum(0, A[0, :, :, curr_layer])
 			A[1, :, :, curr_layer] = np.maximum(0, A[1, :, :, curr_layer])
@@ -273,10 +295,16 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 			A[3, :, :, curr_layer] = np.minimum(rows-1, A[3, :, :, curr_layer])
 
 			curr_layer += 1
-
+	#Finally:
+	#A become [x1,:,:,:],[x2,:,:,:],[y1,:,:,:],[y2,:,:,:]
+	#A.shape = [4,featuremap_height,featuremap_width, num_anchor]
 	all_boxes = np.reshape(A.transpose((0, 3, 1,2)), (4, -1)).transpose((1, 0))
+	#all_boxes.shape = [num_anchor*featuremap_height*featuremap_width, 4]
+	
 	all_probs = rpn_layer.transpose((0, 3, 1, 2)).reshape((-1))
-
+	#all_boxes.shape = [num_anchor*featuremap_height*featuremap_width]
+	
+	
 	x1 = all_boxes[:, 0]
 	y1 = all_boxes[:, 1]
 	x2 = all_boxes[:, 2]

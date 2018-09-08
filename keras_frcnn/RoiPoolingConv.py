@@ -49,14 +49,14 @@ class RoiPoolingConv(Layer):
     def call(self, x, mask=None):
 
         assert(len(x) == 2)
-
-        img = x[0]
+        
+        img = x[0] # raw image: [batch,height,width,3]
         rois = x[1]
 
         input_shape = K.shape(img)
 
         outputs = []
-
+        #self.num_rois = 256
         for roi_idx in range(self.num_rois):
 
             x = rois[0, roi_idx, 0]
@@ -104,8 +104,11 @@ class RoiPoolingConv(Layer):
 
                 rs = tf.image.resize_images(img[:, y:y+h, x:x+w, :], (self.pool_size, self.pool_size))
                 outputs.append(rs)
-
+        #outputs = [[batch,pool_size,pool_size,channel],[batch,pool_size,pool_size,channel],[batch,pool_size,pool_size,channel],..]
+        #final_output.shape = [num_rois,batch,pool_size,pool_size,channel]
         final_output = K.concatenate(outputs, axis=0)
+        
+        #it means batch has to be 1, otherwise it will lead to bug and error
         final_output = K.reshape(final_output, (1, self.num_rois, self.pool_size, self.pool_size, self.nb_channels))
 
         if self.dim_ordering == 'th':
