@@ -92,3 +92,5 @@ ENV/
 *.h5
 *.hdf5
 data
+VOCdevkit
+config.pickle
