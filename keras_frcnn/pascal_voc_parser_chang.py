@@ -59,7 +59,8 @@ def get_data(input_path):
 					class_name = "Headline"
 				if class_name == "Disclaimer":
 					continue
-
+				if class_name == "HeroImage":
+					continue
 				if class_name not in classes_count:
 					classes_count[class_name] = 1
 				else:

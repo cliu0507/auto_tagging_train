@@ -92,3 +92,10 @@ ENV/
 *.h5
 *.hdf5
 data
+VOCdevkit
+config.pickle
+VOCdevkit_2007_test
+VOCdevkit_2007_trainval
+VOCdevkit_2012_trainval
+results_imgs
+VOCdevkit_2012_test

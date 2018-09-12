@@ -16,6 +16,10 @@ from keras_frcnn import losses as losses
 import keras_frcnn.roi_helpers as roi_helpers
 from keras.utils import generic_utils
 
+'''
+python train_frcnn.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit" 
+'''
+
 sys.setrecursionlimit(40000)
 
 parser = OptionParser()
