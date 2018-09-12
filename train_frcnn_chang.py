@@ -19,7 +19,7 @@ from keras_frcnn.pascal_voc_parser_chang import get_data
 from keras_frcnn import resnet as nn
 import tensorflow as tf
 '''
-python train_frcnn_chang.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data"
+python train_frcnn_chang.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data" 
 '''
 
 sys.setrecursionlimit(40000)
@@ -53,7 +53,13 @@ C.rot_90 = bool(options.rot_90)
 C.model_path = options.output_weight_path
 C.num_rois = int(options.num_rois)
 C.network = 'resnet50'
-C.base_net_weights = nn.get_weight_path()
+
+# check if weight path was passed via command line
+if options.input_weight_path:
+	C.base_net_weights = options.input_weight_path
+else:
+	# set the path to weights based on backend and model
+	C.base_net_weights = nn.get_weight_path()
 
 all_imgs, classes_count, class_mapping = get_data(options.train_path)
 #print(all_imgs)
@@ -83,8 +89,11 @@ with open(config_output_filename, 'wb') as config_f:
 
 random.shuffle(all_imgs)
 
-train_imgs = [s for s in all_imgs if s['imageset'] == 'trainval']
-val_imgs = [s for s in all_imgs if s['imageset'] == 'test']
+#train_imgs = [s for s in all_imgs if s['imageset'] == 'trainval']
+train_imgs = [s for s in all_imgs]
+
+#val_imgs = [s for s in all_imgs if s['imageset'] == 'test']
+val_imgs = []
 
 print('Num train samples {}'.format(len(train_imgs)))
 print('Num val samples {}'.format(len(val_imgs)))
@@ -102,9 +111,11 @@ y_rpn_cls -- [1,featuremap_height,featuremap_width, 2 * number of anchors] - inc
 y_rpn_regr -- [1,featuremap_height,featuremap_width, 2 * number of anchors * 4] - include gt and rp anchor
 '''
 
+'''
 for item in data_gen_train:
 	print("item length:",len(item))
 	print("Next Image:")
+'''
 
 #Since we are using tensorflow, so channel last
 img_input = Input(shape=(None,None,3)) # Note input doesn't need batchsize(3-D tensor), however, img_input will have batchsize in first dimension(4-D tensor)

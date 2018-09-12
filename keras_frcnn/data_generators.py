@@ -6,7 +6,6 @@ import copy
 from . import data_augment
 import threading
 import itertools
-from tqdm import tqdm
 
 def union(au, bu, area_intersection):
 	area_a = (au[2] - au[0]) * (au[3] - au[1])
@@ -240,9 +239,9 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 	num_regions = 256
 
 	global visualise
-	visualise = True
+	visualise = False
 	
-	
+	'''
 	print("anchor_sizes:", anchor_sizes)
 	print("anchor_ratios:", anchor_ratios)
 	print("num_anchors",num_anchors)
@@ -253,15 +252,14 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 	print("positive anchor in preliminary search: ", i)
 	print("final positive anchor point number:(anchor_id, height, width) ",len(pos_locs[0]))
 	#print(pos_locs)
-
+	'''
 
 
 	#This section is to visualize the positive anchor
 	if visualise:
-		#print("hello")
 		img = cv2.imread(img_data['filepath'])
 		x_img = cv2.resize(img, (resized_width, resized_height), interpolation=cv2.INTER_CUBIC)
-		print(x_img.shape)
+		#print(x_img.shape)
 		
 		for bbox in img_data['bboxes']:
 			gta_x1 = int(bbox['x1'] * (resized_width / float(width)))
@@ -273,7 +271,7 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 		
 		
 		for pos_loc,ix,jy in zip(pos_locs[0],pos_locs[2],pos_locs[1]):
-			print("anchor_id is :",pos_loc)
+			#print("anchor_id is :",pos_loc)
 			
 			anchor_size_idx = pos_loc // len(anchor_ratios)
 			anchor_ratio_idx = pos_loc % len(anchor_ratios)
@@ -286,14 +284,14 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 			x2_anc =  int(downscale * (ix + 0.5) + anchor_x / 2)  # x2_anc = 16 * (0 + 0.5) + 128/2
 			y1_anc =  int(downscale * (jy + 0.5) - anchor_y / 2)
 			y2_anc =  int(downscale * (jy + 0.5) + anchor_y / 2)
-			print("Valid Positive:",(x1_anc,y1_anc),(x2_anc,y2_anc))
+			#print("Valid Positive:",(x1_anc,y1_anc),(x2_anc,y2_anc))
 			cv2.rectangle(x_img, (x1_anc,y1_anc),(x2_anc,y2_anc), (255, 255, 0),thickness=2)
 		
 		x_img = cv2.resize(x_img, (width * 2 , height * 2), interpolation=cv2.INTER_CUBIC)
 		#cv2.imshow('img', x_img)
 		#cv2.waitKey(0)
 	
-	print("\n")
+	#print("\n")
 
 	if len(pos_locs[0]) > num_regions/2:
 		val_locs = random.sample(range(len(pos_locs[0])), int(len(pos_locs[0]) - num_regions/2))
@@ -341,7 +339,7 @@ def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backen
 	while True:
 		if mode == 'train':
 			np.random.shuffle(all_img_data)
-		for img_data in tqdm(all_img_data):
+		for img_data in all_img_data:
 			try:
 				if C.balanced_classes and sample_selector.skip_sample_for_balanced_class(img_data):
 					continue
