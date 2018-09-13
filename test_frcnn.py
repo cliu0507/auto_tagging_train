@@ -14,6 +14,7 @@ from keras_frcnn import roi_helpers
 
 #python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_test/VOC2007/JPEGImages"
 #python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_trainval/VOC2007/JPEGImages"
+#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2012_test/VOC2007/JPEGImages"
 #python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Chang"
 
 sys.setrecursionlimit(40000)
@@ -246,6 +247,6 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 
 	print('Elapsed time = {}'.format(time.time() - st))
 	print(all_dets)
-	cv2.imshow('img', img)
-	cv2.waitKey(0)
-	#cv2.imwrite('./results_imgs/{}.png'.format(idx),img)
+	#cv2.imshow('img', img)
+	#cv2.waitKey(0)
+	cv2.imwrite('./results_imgs_VOC2012/{}.png'.format(idx),img)
