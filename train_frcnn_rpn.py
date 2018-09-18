@@ -19,7 +19,8 @@ from keras_frcnn.pascal_voc_parser_chang import get_data
 from keras_frcnn import resnet as nn
 import tensorflow as tf
 '''
-python train_frcnn_chang.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data" 
+python train_frcnn_rpn.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data" 
+
 '''
 
 import linecache
@@ -124,11 +125,12 @@ y_rpn_cls -- [1,featuremap_height,featuremap_width, 2 * number of anchors] - inc
 y_rpn_regr -- [1,featuremap_height,featuremap_width, 2 * number of anchors * 4] - include gt and rp anchor
 '''
 
-'''
+
 for item in data_gen_train:
 	print("item length:",len(item))
 	print("Next Image:")
-'''
+
+
 
 #Since we are using tensorflow, so channel last
 img_input = Input(shape=(None,None,3)) # Note input doesn't need batchsize(3-D tensor), however, img_input will have batchsize in first dimension(4-D tensor)
