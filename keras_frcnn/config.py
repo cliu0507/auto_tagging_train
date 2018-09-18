@@ -17,7 +17,7 @@ class Config:
 		# anchor box scales
 		#self.anchor_box_scales = [256,512,1024]
 
-		self.anchor_box_scales = [2,4,8,16]
+		self.anchor_box_scales = [32,64,128,200]
 
 		# anchor box ratios
 		#self.anchor_box_ratios = [[1, 1], [1./math.sqrt(3), 3./math.sqrt(3)], [2./math.sqrt(2), 1./math.sqrt(2)], [3./math.sqrt(3), 1./math.sqrt(3)],[5./math.sqrt(5), 1./math.sqrt(5)], [8./math.sqrt(8), 1./math.sqrt(8)]]
@@ -33,7 +33,7 @@ class Config:
 		self.img_scaling_factor = 1.0
 
 		# number of ROIs at once
-		self.num_rois = 100
+		self.num_rois = 50
 
 		# stride at the RPN (this depends on the network configuration)
 		self.rpn_stride = 2
@@ -46,7 +46,7 @@ class Config:
 
 		# overlaps for RPN
 		self.rpn_min_overlap = 0.3
-		self.rpn_max_overlap = 0.6
+		self.rpn_max_overlap = 0.7
 
 		# overlaps for classifier ROIs
 		self.classifier_min_overlap = 0.1
@@ -60,4 +60,4 @@ class Config:
 		# https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_th_dim_ordering_th_kernels_notop.h5
 		# https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5
 
-		self.model_path = 'model_frcnn.vgg.hdf5'
+		#self.model_path = 'model_frcnn.vgg.hdf5'
