@@ -101,3 +101,4 @@ results_imgs
 VOCdevkit_2012_test
 results_imgs_JPG_Chang
 results_imgs_VOC2012
+*.zip
