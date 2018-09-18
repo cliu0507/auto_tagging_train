@@ -17,7 +17,8 @@ import keras_frcnn.roi_helpers as roi_helpers
 from keras.utils import generic_utils
 
 '''
-python train_frcnn.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit" 
+python train_frcnn.py  --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_trainval" 
+
 '''
 
 sys.setrecursionlimit(40000)
@@ -113,6 +114,12 @@ print('Num val samples {}'.format(len(val_imgs)))
 
 data_gen_train = data_generators.get_anchor_gt(train_imgs, classes_count, C, nn.get_img_output_length, K.image_dim_ordering(), mode='train')
 data_gen_val = data_generators.get_anchor_gt(val_imgs, classes_count, C, nn.get_img_output_length,K.image_dim_ordering(), mode='val')
+
+
+
+for item in data_gen_train:
+	print("item length:",len(item))
+	print("Next Image:")
 
 if K.image_dim_ordering() == 'th':
 	input_shape_img = (3, None, None)
