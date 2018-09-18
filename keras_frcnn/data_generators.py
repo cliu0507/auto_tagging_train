@@ -288,8 +288,8 @@ def calc_rpn(C, img_data, width, height, resized_width, resized_height, img_leng
 			cv2.rectangle(x_img, (x1_anc,y1_anc),(x2_anc,y2_anc), (255, 255, 0),thickness=2)
 		
 		x_img = cv2.resize(x_img, (width * 2 , height * 2), interpolation=cv2.INTER_CUBIC)
-		#cv2.imshow('img', x_img)
-		#cv2.waitKey(0)
+		cv2.imshow('img', x_img)
+		cv2.waitKey(0)
 	
 	#print("\n")
 
