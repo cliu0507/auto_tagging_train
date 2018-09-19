@@ -244,7 +244,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 	anchor_sizes = C.anchor_box_scales
 	anchor_ratios = C.anchor_box_ratios
 	
-	#batch size must equal to 1
+	#batch size must equal to 1 - number of image
 	assert rpn_layer.shape[0] == 1
 
 	if dim_ordering == 'th':
@@ -293,7 +293,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 			A[1, :, :, curr_layer] = np.maximum(0, A[1, :, :, curr_layer])
 			A[2, :, :, curr_layer] = np.minimum(cols-1, A[2, :, :, curr_layer])
 			A[3, :, :, curr_layer] = np.minimum(rows-1, A[3, :, :, curr_layer])
-
+			
 			curr_layer += 1
 	#Finally:
 	#A become [x1,:,:,:],[x2,:,:,:],[y1,:,:,:],[y2,:,:,:]
@@ -304,6 +304,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=
 	all_probs = rpn_layer.transpose((0, 3, 1, 2)).reshape((-1))
 	#all_boxes.shape = [num_anchor*featuremap_height*featuremap_width]
 	
+	test = np.transpose(A, (3, 0, 1, 2))
 	
 	x1 = all_boxes[:, 0]
 	y1 = all_boxes[:, 1]

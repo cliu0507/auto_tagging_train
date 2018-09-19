@@ -12,11 +12,11 @@ from keras.layers import Input
 from keras.models import Model
 from keras_frcnn import roi_helpers
 
-#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_test/VOC2007/JPEGImages"
-#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_trainval/VOC2007/JPEGImages"
-#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2012_test/VOC2012/JPEGImages"
-#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Chang"
-#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Chang"
+#python test_frcnn_rpn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_test/VOC2007/JPEGImages"
+#python test_frcnn_rpn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_trainval/VOC2007/JPEGImages"
+#python test_frcnn_rpn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2012_test/VOC2012/JPEGImages"
+#python test_frcnn_rpn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Chang"
+#python test_frcnn_rpn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Chang"
 
 sys.setrecursionlimit(40000)
 
@@ -27,7 +27,7 @@ parser.add_option("-n", "--num_rois", type="int", dest="num_rois",
 				help="Number of ROIs per iteration. Higher means more memory use.", default=32)
 parser.add_option("--config_filename", dest="config_filename", help=
 				"Location to read the metadata related to the training (generated when training).",
-				default="./config.pickle")
+				default="./model_JPG_Chang_rpn_test/config.pickle")
 parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.", default='resnet50')
 
 (options, args) = parser.parse_args()
@@ -47,7 +47,7 @@ import keras_frcnn.resnet as nn
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
 C.rot_90 = False
-C.base_net_weights = "./model_frcnn_rpn.hdf5"
+C.base_net_weights = "./model_JPG_Chang_rpn_test/model_frcnn_rpn.hdf5"
 
 img_path = options.test_path
 
@@ -154,11 +154,11 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 	filepath = os.path.join(img_path,img_name)
 
 	img = cv2.imread(filepath)
-
 	X, ratio = format_img(img, C)
-
 	X = np.transpose(X, (0, 2, 3, 1))
-
+	x_img = X[0]
+	#cv2.imshow('image', x_img)
+	#cv2.waitKey(0)
 	# get the feature maps and output from the RPN
 	[Y1, Y2, F] = model_rpn.predict(X)
 	
@@ -167,11 +167,35 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 	#Y1 - [1,19,23,16] , value- float
 
 	R = roi_helpers.rpn_to_roi(Y1, Y2, C, K.image_dim_ordering(), overlap_thresh=0.7)
-
+	
+	
+	# This section is to visualize the positive anchor
+	if visualise:
+		
+		'''
+		for bbox in img_data['bboxes']:
+			gta_x1 = int(bbox['x1'] * (resized_width / float(width)))
+			gta_x2 = int(bbox['x2'] * (resized_width / float(width)))
+			gta_y1 = int(bbox['y1'] * (resized_height / float(height)))
+			gta_y2 = int(bbox['y2'] * (resized_height / float(height)))
+			# print((gta_x1,gta_y1),(gta_x2,gta_y2))
+			cv2.rectangle(x_img, (gta_x1, gta_y1), (gta_x2, gta_y2), (0, 0, 255), thickness=2)
+		'''
+		x_img = X[0].copy()
+		print("shape of image",x_img.shape)
+		for k,(x1_anc, y1_anc, x2_anc, y2_anc) in enumerate(R):
+			print((x1_anc, y1_anc, x2_anc, y2_anc))
+			cv2.rectangle(x_img, (x1_anc * C.rpn_stride, y1_anc*C.rpn_stride), (x2_anc*C.rpn_stride, y2_anc*C.rpn_stride), (0, 0, 0), thickness=2)
+			cv2.imshow('img', x_img)
+			cv2.waitKey(0)
+		#cv2.imshow('img', x_img)
+		#cv2.waitKey(0)
+	
+	
 	# convert from (x1,y1,x2,y2) to (x,y,w,h)
 	R[:, 2] -= R[:, 0]
 	R[:, 3] -= R[:, 1]
-
+	
 
 	'''
 	# apply the spatial pyramid pooling to the proposed regions

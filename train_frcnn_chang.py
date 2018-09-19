@@ -36,7 +36,7 @@ parser.add_option("--num_epochs", type="int", dest="num_epochs", help="Number of
 parser.add_option("--config_filename", dest="config_filename", help=
 				"Location to store all the metadata related to the training (to be used when testing).",
 				default="config.pickle")
-parser.add_option("--output_weight_path", dest="output_weight_path", help="Output path for weights.", default='./model_frcnn.hdf5')
+parser.add_option("--output_weight_path", dest="output_weight_path", help="Output path for weights.", default='./model_frcnn_final.hdf5')
 parser.add_option("--input_weight_path", dest="input_weight_path", help="Input path for weights. If not specified, will try to load default weights provided by keras.")
 
 (options, args) = parser.parse_args()
@@ -54,12 +54,14 @@ C.model_path = options.output_weight_path
 C.num_rois = int(options.num_rois)
 C.network = 'resnet50'
 
+
 # check if weight path was passed via command line
 if options.input_weight_path:
 	C.base_net_weights = options.input_weight_path
 else:
 	# set the path to weights based on backend and model
 	C.base_net_weights = nn.get_weight_path()
+C.base_net_weights = './model_frcnn_rpn.hdf5'
 
 all_imgs, classes_count, class_mapping = get_data(options.train_path)
 #print(all_imgs)
@@ -149,7 +151,8 @@ try:
 	print('loading weights from {}'.format(C.base_net_weights))
 	model_rpn.load_weights(C.base_net_weights, by_name=True)
 	model_classifier.load_weights(C.base_net_weights, by_name=True)
-except:
+except Exception as e:
+	print(e)
 	print('Could not load pretrained model weights. Weights can be found in the keras application folder \
 		https://github.com/fchollet/keras/tree/master/keras/applications')
 
