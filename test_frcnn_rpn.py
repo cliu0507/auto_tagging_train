@@ -27,7 +27,7 @@ parser.add_option("-n", "--num_rois", type="int", dest="num_rois",
 				help="Number of ROIs per iteration. Higher means more memory use.", default=32)
 parser.add_option("--config_filename", dest="config_filename", help=
 				"Location to read the metadata related to the training (generated when training).",
-				default="./model_JPG_Chang_rpn_test/config.pickle")
+				default="./model_JPG_Chang_rpn/config.pickle")
 parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.", default='resnet50')
 
 (options, args) = parser.parse_args()
@@ -47,7 +47,9 @@ import keras_frcnn.resnet as nn
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
 C.rot_90 = False
-C.base_net_weights = "./model_JPG_Chang_rpn_test/model_frcnn_rpn.hdf5"
+C.base_net_weights = "./model_JPG_Chang_rpn/model_frcnn_rpn.hdf5"
+C.model_path = "./model_JPG_Chang_rpn/model_frcnn_rpn.hdf5"
+
 
 img_path = options.test_path
 
@@ -186,8 +188,8 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 		for k,(x1_anc, y1_anc, x2_anc, y2_anc) in enumerate(R):
 			print((x1_anc, y1_anc, x2_anc, y2_anc))
 			cv2.rectangle(x_img, (x1_anc * C.rpn_stride, y1_anc*C.rpn_stride), (x2_anc*C.rpn_stride, y2_anc*C.rpn_stride), (0, 0, 0), thickness=2)
-			cv2.imshow('img', x_img)
-			cv2.waitKey(0)
+			#cv2.imshow('img', x_img)
+			#cv2.waitKey(0)
 		#cv2.imshow('img', x_img)
 		#cv2.waitKey(0)
 	

@@ -16,6 +16,7 @@ from keras_frcnn import roi_helpers
 #python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2007_trainval/VOC2007/JPEGImages"
 #python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/VOCdevkit_2012_test/VOC2012/JPEGImages"
 #python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Chang"
+#python test_frcnn.py --path "/Users/cliu/Documents/Github/keras-frcnn-orginal/data/JPG_Test"
 
 sys.setrecursionlimit(40000)
 
@@ -26,7 +27,7 @@ parser.add_option("-n", "--num_rois", type="int", dest="num_rois",
 				help="Number of ROIs per iteration. Higher means more memory use.", default=32)
 parser.add_option("--config_filename", dest="config_filename", help=
 				"Location to read the metadata related to the training (generated when training).",
-				default="./model_JPG_Chang_final_sep19/config.pickle")
+				default="./model_JPG_Chang_final_sep_19/config.pickle")
 parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.", default='resnet50')
 
 (options, args) = parser.parse_args()
@@ -49,7 +50,7 @@ elif C.network == 'vgg':
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
 C.rot_90 = False
-C.model_path = "./model_JPG_Chang_final_sep19/model_frcnn_final.hdf5"
+C.model_path = "./model_JPG_Chang_final_sep_19/model_frcnn_final.hdf5"
 img_path = options.test_path
 
 def format_img_size(img, C):
@@ -245,14 +246,14 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 				(retval,baseLine) = cv2.getTextSize(textLabel,cv2.FONT_HERSHEY_COMPLEX,1,1)
 				textOrg = (real_x1, real_y1-0)
 	
-				cv2.rectangle(img, (textOrg[0] - 5, textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (0, 0, 0), 2)
-				cv2.rectangle(img, (textOrg[0] - 5,textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (255, 255, 255), -1)
-				cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 0.3, (0, 0, 0), 1)
+				cv2.rectangle(img, (textOrg[0] - 5, textOrg[1]+baseLine - 5), (textOrg[0]+ int(retval[0] * 0.3) + 5, textOrg[1]-int(retval[1]* 0.3) - 5), (0, 0, 0), 2)
+				cv2.rectangle(img, (textOrg[0] - 5,textOrg[1]+baseLine - 5), (textOrg[0]+int(retval[0] * 0.3)+ 5, textOrg[1]-int(retval[1]* 0.3) - 5), (255, 255, 255), -1)
+				cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 0.3 , (0, 0, 0), 1)
 	
 		print('Elapsed time = {}'.format(time.time() - st))
 		print(all_dets)
-		cv2.imshow('img', img)
-		cv2.waitKey(0)
-		#cv2.imwrite('./results_imgs_JPG_Chang/{}.png'.format(idx),img)
+		#cv2.imshow('img', img)
+		#cv2.waitKey(0)
+		cv2.imwrite('./results_imgs_JPG_Chang/{}.png'.format(idx),img)
 	except Exception as e:
 		print(e)

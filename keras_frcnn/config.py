@@ -18,8 +18,8 @@ class Config:
 		#below setting is too large if im_size = 300
 		#self.anchor_box_scales = [256,512,1024]
 
-		self.anchor_box_scales = [32,64,128,200]
-		#self.anchor_box_scales = [32,64,128]
+		#self.anchor_box_scales = [32,64,128,200]
+		self.anchor_box_scales = [32,64,128]
 
 		# anchor box ratios
 		#self.anchor_box_ratios = [[1, 1], [1./math.sqrt(3), 3./math.sqrt(3)], [2./math.sqrt(2), 1./math.sqrt(2)], [3./math.sqrt(3), 1./math.sqrt(3)],[5./math.sqrt(5), 1./math.sqrt(5)], [8./math.sqrt(8), 1./math.sqrt(8)]]
